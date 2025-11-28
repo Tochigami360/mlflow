@@ -34,6 +34,7 @@ services:
       MLFLOW_PORT: ${MLFLOW_PORT}
       MLFLOW_ALLOWED_HOSTS: ${MLFLOW_ALLOWED_HOSTS}
       MLFLOW_AUTH_CONFIG_PATH: /mlflow/auth/basic_auth.ini
+      MLFLOW_FLASK_SERVER_SECRET_KEY: ${MLFLOW_FLASK_SERVER_SECRET_KEY}
     volumes:
       - mlflow-auth:/mlflow/auth
     command:
