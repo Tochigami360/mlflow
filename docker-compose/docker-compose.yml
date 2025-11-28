@@ -40,7 +40,7 @@ services:
       - /bin/bash
       - -c
       - |
-        pip install --no-cache-dir psycopg2-binary boto3
+        pip install --no-cache-dir psycopg2-binary boto3 mlflow[auth]
         
         mkdir -p /mlflow/auth
         if [ ! -f /mlflow/auth/basic_auth.ini ]; then
@@ -53,6 +53,13 @@ services:
         authorization_function = mlflow.server.auth:authenticate_request_basic_auth
         EOF
         fi
+    
+    mlflow server \
+      --backend-store-uri "${MLFLOW_BACKEND_STORE_URI}" \
+      --default-artifact-root "${MLFLOW_DEFAULT_ARTIFACT_ROOT}" \
+      --host "${MLFLOW_HOST}" \
+      --port "${MLFLOW_PORT}" \
+      --app-name basic-auth
         
         mlflow server \
           --backend-store-uri "${MLFLOW_BACKEND_STORE_URI}" \
