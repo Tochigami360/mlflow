@@ -16,45 +16,45 @@ services:
       timeout: 3s
       retries: 10
 
-mlflow:
-  image: ghcr.io/mlflow/mlflow:${MLFLOW_VERSION}
-  container_name: mlflow-server
-  depends_on:
-    postgres:
-      condition: service_healthy
-  environment:
-    MLFLOW_BACKEND_STORE_URI: ${MLFLOW_BACKEND_STORE_URI}
-    MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
-    MLFLOW_DEFAULT_ARTIFACT_ROOT: ${MLFLOW_DEFAULT_ARTIFACT_ROOT}
-    AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-    AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-    AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-    MLFLOW_HOST: ${MLFLOW_HOST}
-    MLFLOW_PORT: ${MLFLOW_PORT}
-    MLFLOW_ALLOWED_HOSTS: ${MLFLOW_ALLOWED_HOSTS}
-  command:
-    - /bin/bash
-    - -c
-    - |
-      pip install --no-cache-dir psycopg2-binary boto3
-      mlflow server \
-        --backend-store-uri "${MLFLOW_BACKEND_STORE_URI}" \
-        --default-artifact-root "${MLFLOW_DEFAULT_ARTIFACT_ROOT}" \
-        --host "${MLFLOW_HOST}" \
-        --port "${MLFLOW_PORT}"
-  ports:
-    - "${MLFLOW_PORT}:${MLFLOW_PORT}"
-  healthcheck:
-    test:
-      [
-        "CMD",
-        "python",
-        "-c",
-        "import urllib.request; urllib.request.urlopen('http://localhost:${MLFLOW_PORT}/health')",
-      ]
-    interval: 10s
-    timeout: 5s
-    retries: 30
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:${MLFLOW_VERSION}
+    container_name: mlflow-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      MLFLOW_BACKEND_STORE_URI: ${MLFLOW_BACKEND_STORE_URI}
+      MLFLOW_S3_ENDPOINT_URL: ${MLFLOW_S3_ENDPOINT_URL}
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: ${MLFLOW_DEFAULT_ARTIFACT_ROOT}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      MLFLOW_HOST: ${MLFLOW_HOST}
+      MLFLOW_PORT: ${MLFLOW_PORT}
+      MLFLOW_ALLOWED_HOSTS: ${MLFLOW_ALLOWED_HOSTS}
+    command:
+      - /bin/bash
+      - -c
+      - |
+        pip install --no-cache-dir psycopg2-binary boto3
+        mlflow server \
+          --backend-store-uri "${MLFLOW_BACKEND_STORE_URI}" \
+          --default-artifact-root "${MLFLOW_DEFAULT_ARTIFACT_ROOT}" \
+          --host "${MLFLOW_HOST}" \
+          --port "${MLFLOW_PORT}"
+    ports:
+      - "${MLFLOW_PORT}:${MLFLOW_PORT}"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:${MLFLOW_PORT}/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
 
 networks:
   default:
