@@ -1,5 +1,6 @@
 volumes:
   pgdata:
+  mlflow-auth:
 
 services:
   postgres:
@@ -32,18 +33,33 @@ services:
       MLFLOW_HOST: ${MLFLOW_HOST}
       MLFLOW_PORT: ${MLFLOW_PORT}
       MLFLOW_ALLOWED_HOSTS: ${MLFLOW_ALLOWED_HOSTS}
+      MLFLOW_AUTH_CONFIG_PATH: /mlflow/auth/basic_auth.ini
+    volumes:
+      - mlflow-auth:/mlflow/auth
     command:
       - /bin/bash
       - -c
       - |
         pip install --no-cache-dir psycopg2-binary boto3
+        
+        mkdir -p /mlflow/auth
+        if [ ! -f /mlflow/auth/basic_auth.ini ]; then
+          cat > /mlflow/auth/basic_auth.ini << EOF
+        [mlflow]
+        default_permission = READ
+        database_uri = sqlite:////mlflow/auth/basic_auth.db
+        admin_username = ${MLFLOW_ADMIN_USERNAME}
+        admin_password = ${MLFLOW_ADMIN_PASSWORD}
+        authorization_function = mlflow.server.auth:authenticate_request_basic_auth
+        EOF
+        fi
+        
         mlflow server \
           --backend-store-uri "${MLFLOW_BACKEND_STORE_URI}" \
           --default-artifact-root "${MLFLOW_DEFAULT_ARTIFACT_ROOT}" \
-          --cors-allowed-origins "${MLFLOW_SERVER_CORS_ALLOWED_ORIGINS}" \
-          --allowed-hosts "${MLFLOW_SERVER_ALLOWED_HOSTS}" \
           --host "${MLFLOW_HOST}" \
-          --port "${MLFLOW_PORT}"
+          --port "${MLFLOW_PORT}" \
+          --app-name basic-auth
     ports:
       - "${MLFLOW_PORT}:${MLFLOW_PORT}"
     healthcheck:
